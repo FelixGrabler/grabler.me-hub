@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  # Main distributor frontend (grabler.me)
+  distributor:
+    build:
+      context: ./distributor-frontend
+      dockerfile: Dockerfile
+    container_name: distributor
+    restart: unless-stopped
+    networks:
+      - grabler-network
+
+  # Nginx proxy for routing subdomains
+  proxy:
+    image: nginx:alpine
+    container_name: grabler-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./proxy/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./proxy/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - distributor
+    networks:
+      - grabler-network
+
+networks:
+  grabler-network:
+    driver: bridge

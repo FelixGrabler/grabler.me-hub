@@ -1,0 +1,3 @@
+[submodule "Namo"]
+	path = Namo
+	url = https://github.com/FelixGrabler/Namo.git

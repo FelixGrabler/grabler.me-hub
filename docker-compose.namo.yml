@@ -1,0 +1,40 @@
+version: "3.8"
+
+# This file overrides Namo services to integrate them into the global hub
+services:
+  # Override Namo database
+  db:
+    container_name: namo-db
+    networks:
+      - grabler-network
+    ports: [] # Remove port exposure for production
+
+  # Override Namo backend
+  backend:
+    container_name: namo-backend
+    networks:
+      - grabler-network
+    ports: [] # Remove port exposure for production
+    environment:
+      # Override environment for production integration
+      ENVIRONMENT: production
+      DATABASE_HOST: namo-db
+      DEBUG: "false"
+      RELOAD: "false"
+      LOG_LEVEL: "info"
+      CORS_ORIGINS: "https://namo.grabler.me"
+
+  # Override Namo frontend
+  frontend:
+    container_name: namo-frontend
+    networks:
+      - grabler-network
+    ports: [] # Remove port exposure for production
+    environment:
+      VITE_API_URL: "https://namo.grabler.me/api"
+      VITE_ENVIRONMENT: "production"
+      VITE_APP_NAME: "Namo"
+
+networks:
+  grabler-network:
+    external: true
