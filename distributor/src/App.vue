@@ -41,13 +41,16 @@
 export default {
   name: 'App',
   data() {
+    const isDevelopment = import.meta.env.MODE === 'development'
+    const namoUrl = isDevelopment ? 'http://namo.localhost:5173' : 'https://namo.grabler.me'
+    
     return {
       projects: [
         {
           id: 'namo',
           title: 'Namo',
           description: 'A comprehensive name analysis and statistics platform. Explore name popularity, trends, and cultural insights across different countries and time periods.',
-          url: 'https://namo.grabler.me',
+          url: namoUrl,
           icon: '📊',
           gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           status: 'development'

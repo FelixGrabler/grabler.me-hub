@@ -12,6 +12,8 @@ help:
 	@echo "  clean      - Remove all containers, volumes, and images"
 	@echo "  restart    - Restart all services"
 	@echo "  health     - Check health of all services"
+	@echo "  debug      - Start with debug configuration (direct passwords)"
+	@echo "  test-namo  - Test only Namo services"
 
 # Development environment
 dev:
@@ -20,8 +22,6 @@ dev:
 	docker network create grabler-network 2>/dev/null || true
 	@echo "Starting main services..."
 	docker-compose -f docker-compose.dev.yml up -d
-	@echo "Starting Namo services..."
-	docker-compose -f ./Namo/docker-compose.yml -f ./docker-compose.namo.dev.yml up -d
 	@echo "Development environment started!"
 	@echo "Main site: http://localhost:8080"
 	@echo "Namo site: http://namo.localhost:8080"
@@ -30,7 +30,7 @@ dev:
 
 dev-down:
 	@echo "Stopping development environment..."
-	docker-compose -f ./Namo/docker-compose.yml -f ./docker-compose.namo.dev.yml down
+	cd Namo && docker-compose -f docker-compose.yml -f ../docker-compose.namo.dev.yml down
 	docker-compose -f docker-compose.dev.yml down
 
 # Production environment
@@ -41,7 +41,7 @@ prod:
 	@echo "Starting main services..."
 	docker-compose up -d
 	@echo "Starting Namo services..."
-	docker-compose -f ./Namo/docker-compose.yml -f ./docker-compose.namo.yml up -d
+	cd Namo && docker-compose -f docker-compose.yml -f ../docker-compose.namo.yml up -d
 	@echo "Production environment started!"
 	@echo "Configure your DNS to point to this server:"
 	@echo "  grabler.me -> your-server-ip"
@@ -49,7 +49,7 @@ prod:
 
 prod-down:
 	@echo "Stopping production environment..."
-	docker-compose -f ./Namo/docker-compose.yml -f ./docker-compose.namo.yml down
+	cd Namo && docker-compose -f docker-compose.yml -f ../docker-compose.namo.yml down
 	docker-compose down
 
 # Build all services
@@ -96,7 +96,31 @@ health:
 	@echo "\nChecking Namo API health:"
 	@curl -f http://localhost:8000/health 2>/dev/null && echo "✅ Namo API healthy" || echo "❌ Namo API unhealthy"
 
-# Update submodules (if using git submodules for projects)
+# Debug environment with direct passwords
+debug:
+	@echo "Starting debug environment (using direct passwords)..."
+	@echo "Creating global network..."
+	docker network create grabler-network 2>/dev/null || true
+	@echo "Starting main services..."
+	docker-compose up -d
+	@echo "Starting Namo services with debug config..."
+	docker-compose -f ./Namo/docker-compose.yml -f ./docker-compose.namo.debug.yml up -d
+	@echo "Debug environment started!"
+	@echo "Check logs with: make logs-debug"
+
+# Test only Namo services
+test-namo:
+	@echo "Testing Namo services only..."
+	@echo "Creating global network..."
+	docker network create grabler-network 2>/dev/null || true
+	@echo "Starting Namo services..."
+	docker-compose -f ./Namo/docker-compose.yml -f ./docker-compose.namo.debug.yml up -d
+	@echo "Namo services started!"
+	@echo "Check with: docker-compose -f ./Namo/docker-compose.yml -f ./docker-compose.namo.debug.yml ps"
+
+logs-debug:
+	@echo "Showing debug logs..."
+	docker-compose -f ./Namo/docker-compose.yml -f ./docker-compose.namo.debug.yml logs -f
 update-submodules:
 	git submodule update --init --recursive
 	git submodule foreach git pull origin main

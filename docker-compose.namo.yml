@@ -4,29 +4,82 @@ version: "3.8"
 services:
   # Override Namo database
   db:
+    image: postgres:16-alpine
     container_name: namo-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: namo_prod
+      POSTGRES_PASSWORD_FILE: /run/secrets/prod_postgres_password
+      POSTGRES_DB: namo_prod
+    volumes:
+      - namo_db-data:/var/lib/postgresql/data
+    secrets:
+      - prod_postgres_password
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "namo_prod", "-d", "namo_prod"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
       - grabler-network
     ports: [] # Remove port exposure for production
 
   # Override Namo backend
   backend:
+    build:
+      context: ./Namo
+      dockerfile: app/backend/Dockerfile
     container_name: namo-backend
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
     networks:
       - grabler-network
     ports: [] # Remove port exposure for production
+    volumes:
+      - ./Namo/logs:/app/backend/logs
     environment:
-      # Override environment for production integration
+      # Override environment for development integration (using prod secrets)
       ENVIRONMENT: production
+      # Database
+      POSTGRES_USER: namo_prod
+      POSTGRES_DB: namo_prod
       DATABASE_HOST: namo-db
+      # FastAPI Configuration
       DEBUG: "false"
       RELOAD: "false"
       LOG_LEVEL: "info"
+      # JWT Configuration
+      ALGORITHM: "HS256"
+      ACCESS_TOKEN_EXPIRE_MINUTES: "10080"
+      # CORS Configuration
       CORS_ORIGINS: "https://namo.grabler.me"
+      # Logging Configuration
+      LOG_MAX_SIZE_MB: "10"
+      LOG_BACKUP_COUNT: "3"
+      LOG_CONSOLE: "true"
+    secrets:
+      - prod_postgres_password
+      - prod_secret_key
+      - telegram_bot_token
+      - prod_telegram_chat_id
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # Override Namo frontend
   frontend:
+    build:
+      context: ./Namo
+      dockerfile: app/frontend/Dockerfile
     container_name: namo-frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
     networks:
       - grabler-network
     ports: [] # Remove port exposure for production
@@ -34,6 +87,20 @@ services:
       VITE_API_URL: "https://namo.grabler.me/api"
       VITE_ENVIRONMENT: "production"
       VITE_APP_NAME: "Namo"
+
+# Override secrets with correct paths from global directory
+secrets:
+  prod_postgres_password:
+    file: ./Namo/secrets/prod_postgres_password.txt
+  prod_secret_key:
+    file: ./Namo/secrets/prod_secret_key.txt
+  telegram_bot_token:
+    file: ./Namo/secrets/telegram_bot_token.txt
+  prod_telegram_chat_id:
+    file: ./Namo/secrets/prod_telegram_chat_id.txt
+
+volumes:
+  namo_db-data:
 
 networks:
   grabler-network:

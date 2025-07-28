@@ -25,14 +25,14 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: namo_dev
-      POSTGRES_PASSWORD_FILE: /run/secrets/namo_postgres_password
+      POSTGRES_PASSWORD_FILE: /run/secrets/dev_postgres_password
       POSTGRES_DB: namo_dev
     volumes:
       - namo-db-data-dev:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     secrets:
-      - namo_postgres_password
+      - dev_postgres_password
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "namo_dev", "-d", "namo_dev"]
       interval: 5s
@@ -81,10 +81,10 @@ services:
       LOG_BACKUP_COUNT: "3"
       LOG_CONSOLE: "true"
     secrets:
-      - namo_postgres_password
-      - namo_secret_key
-      - namo_telegram_bot_token
-      - namo_telegram_chat_id
+      - dev_postgres_password
+      - dev_secret_key
+      - telegram_bot_token
+      - dev_telegram_chat_id
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -105,8 +105,8 @@ services:
     ports:
       - "5173:5173"
     volumes:
-      - ./Namo/app/frontend:/app
-      - /app/node_modules
+      - ./Namo/app/frontend:/app/frontend
+      - /app/frontend/node_modules
     environment:
       VITE_API_URL: "http://localhost:8000"
       VITE_ENVIRONMENT: "development"
@@ -138,11 +138,11 @@ volumes:
   namo-db-data-dev:
 
 secrets:
-  namo_postgres_password:
+  dev_postgres_password:
     file: ./Namo/secrets/dev_postgres_password.txt
-  namo_secret_key:
+  dev_secret_key:
     file: ./Namo/secrets/dev_secret_key.txt
-  namo_telegram_bot_token:
+  telegram_bot_token:
     file: ./Namo/secrets/telegram_bot_token.txt
-  namo_telegram_chat_id:
+  dev_telegram_chat_id:
     file: ./Namo/secrets/dev_telegram_chat_id.txt

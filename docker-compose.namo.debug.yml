@@ -1,0 +1,51 @@
+version: "3.8"
+
+# Debug version with direct password (NOT for production!)
+services:
+  # Override Namo database with direct password for testing
+  db:
+    container_name: namo-db-debug
+    networks:
+      - grabler-network
+    ports: [] # Remove port exposure
+    environment:
+      POSTGRES_USER: namo_dev
+      POSTGRES_PASSWORD: postgres # Direct password for debugging
+      POSTGRES_DB: namo_dev
+      POSTGRES_PASSWORD_FILE: # Clear the password file
+    # Remove secrets temporarily for debugging
+    secrets: []
+
+  # Override Namo backend
+  backend:
+    container_name: namo-backend-debug
+    networks:
+      - grabler-network
+    ports: [] # Remove port exposure
+    environment:
+      # Override environment for production integration
+      ENVIRONMENT: production
+      DATABASE_HOST: namo-db-debug
+      DEBUG: "false"
+      RELOAD: "false"
+      LOG_LEVEL: "info"
+      CORS_ORIGINS: "https://namo.grabler.me"
+      # Database connection
+      POSTGRES_USER: namo_dev
+      POSTGRES_PASSWORD: postgres # Same as database
+      POSTGRES_DB: namo_dev
+
+  # Override Namo frontend
+  frontend:
+    container_name: namo-frontend-debug
+    networks:
+      - grabler-network
+    ports: [] # Remove port exposure
+    environment:
+      VITE_API_URL: "https://namo.grabler.me/api"
+      VITE_ENVIRONMENT: "production"
+      VITE_APP_NAME: "Namo"
+
+networks:
+  grabler-network:
+    external: true
