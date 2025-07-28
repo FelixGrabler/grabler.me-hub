@@ -17,8 +17,8 @@
           target="_blank"
           rel="noopener noreferrer"
         >
-          <div class="project-image" :style="{ background: project.gradient }">
-            <span>{{ project.icon }}</span>
+          <div class="project-image">
+            <img :src="project.image" :alt="project.title" />
           </div>
           <div class="project-content">
             <h3 class="project-title">{{ project.title }}</h3>
@@ -54,17 +54,15 @@ export default {
           title: 'Felix Portfolio',
           description: 'My personal portfolio website showcasing my projects, skills, and professional experience. A modern, responsive showcase of my work and expertise.',
           url: felixUrl,
-          icon: '�‍💻',
-          gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          image: '/data/Felix.jpg',
           status: 'live'
         },
         {
           id: 'mama-rezepte',
-          title: 'MamaRezepte',
+          title: 'Mama-Rezepte',
           description: 'Eine Sammlung von Familienrezepten. Zusätzliche Features wie Filter und Mengenberechnung kommen bald.',
           url: rezepteUrl,
-          icon: '👩‍🍳',
-          gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+          image: '/data/essen1.jpg',
           status: 'live'
         },
         {
@@ -72,8 +70,7 @@ export default {
           title: 'Namo',
           description: 'Eine Seite, um den perfekten Vornamen fürs Kind zu finden. Nach aktuellen Daten aus Österreich, mit Features wie Filter, Vergleich von Stimmen mit einer anderen Person und einigen Spielen.',
           url: namoUrl,
-          icon: '�',
-          gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+          image: '/data/namo.png',
           status: 'development'
         }
       ]
@@ -81,3 +78,29 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.project-tile .project-image {
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 1 / 1 !important; /* This ensures perfect square */
+  overflow: hidden;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f5;
+}
+
+.project-tile .project-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Remove the pseudo-element overlay from global styles */
+.project-tile .project-image::before {
+  display: none !important;
+}
+</style>
