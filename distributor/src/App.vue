@@ -3,7 +3,7 @@
     <header class="header">
       <div class="container">
         <h1>Grabler.me</h1>
-        <p>Welcome to my project hub - explore my various applications and tools</p>
+        <p>Willkommen in meinem Projekt-Hub - entdecke meine verschiedenen Websites und Tools</p>
       </div>
     </header>
 
@@ -42,29 +42,40 @@ export default {
   name: 'App',
   data() {
     const isDevelopment = import.meta.env.MODE === 'development'
-    const namoUrl = isDevelopment ? 'http://namo.localhost:5173' : 'https://namo.grabler.me'
+    const baseUrl = isDevelopment ? 'http://localhost:8080' : 'https://grabler.me'
+    const felixUrl = isDevelopment ? 'http://felix.localhost:8080' : 'https://felix.grabler.me'
+    const rezepteUrl = isDevelopment ? 'http://rezepte.localhost:8080' : 'https://rezepte.grabler.me'
+    const namoUrl = isDevelopment ? 'http://namo.localhost:8080' : 'https://namo.grabler.me'
     
     return {
       projects: [
         {
+          id: 'felix',
+          title: 'Felix Portfolio',
+          description: 'My personal portfolio website showcasing my projects, skills, and professional experience. A modern, responsive showcase of my work and expertise.',
+          url: felixUrl,
+          icon: '�‍💻',
+          gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          status: 'live'
+        },
+        {
+          id: 'mama-rezepte',
+          title: 'MamaRezepte',
+          description: 'Eine Sammlung von Familienrezepten. Zusätzliche Features wie Filter und Mengenberechnung kommen bald.',
+          url: rezepteUrl,
+          icon: '👩‍🍳',
+          gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+          status: 'live'
+        },
+        {
           id: 'namo',
           title: 'Namo',
-          description: 'A comprehensive name analysis and statistics platform. Explore name popularity, trends, and cultural insights across different countries and time periods.',
+          description: 'Eine Seite, um den perfekten Vornamen fürs Kind zu finden. Nach aktuellen Daten aus Österreich, mit Features wie Filter, Vergleich von Stimmen mit einer anderen Person und einigen Spielen.',
           url: namoUrl,
-          icon: '📊',
-          gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          icon: '�',
+          gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
           status: 'development'
         }
-        // Add more projects here as they become available
-        // {
-        //   id: 'project2',
-        //   title: 'Project 2',
-        //   description: 'Description of another project',
-        //   url: 'https://project2.grabler.me',
-        //   icon: '🚀',
-        //   gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-        //   status: 'live'
-        // }
       ]
     }
   }

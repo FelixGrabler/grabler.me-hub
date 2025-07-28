@@ -1,36 +1,47 @@
-.PHONY: help build up down logs clean dev dev-down prod prod-down restart health
+.PHONY: help build up down logs clean dev dev-down prod prod-down restart health update-submodules
 
 # Default target
 help:
 	@echo "Available commands:"
-	@echo "  dev        - Start development environment"
-	@echo "  dev-down   - Stop development environment"
-	@echo "  prod       - Start production environment"
-	@echo "  prod-down  - Stop production environment"
-	@echo "  build      - Build all services"
-	@echo "  logs       - Show logs from all services"
-	@echo "  clean      - Remove all containers, volumes, and images"
-	@echo "  restart    - Restart all services"
-	@echo "  health     - Check health of all services"
-	@echo "  debug      - Start with debug configuration (direct passwords)"
-	@echo "  test-namo  - Test only Namo services"
+	@echo "  dev          - Start development environment"
+	@echo "  dev-down     - Stop development environment"
+	@echo "  prod         - Start production environment"
+	@echo "  prod-down    - Stop production environment"
+	@echo "  build        - Build all services"
+	@echo "  logs         - Show logs from all services"
+	@echo "  logs-dev     - Show logs from development services"
+	@echo "  clean        - Remove all containers, volumes, and images"
+	@echo "  restart      - Restart all production services"
+	@echo "  restart-dev  - Restart all development services"
+	@echo "  health       - Check health of all services"
+	@echo "  update-submodules - Update all git submodules"
+	@echo "  setup-dev    - Setup development environment (create example secrets)"
 
 # Development environment
 dev:
 	@echo "Starting development environment..."
 	@echo "Creating global network..."
 	docker network create grabler-network 2>/dev/null || true
-	@echo "Starting main services..."
+	@echo "Starting all development services..."
 	docker-compose -f docker-compose.dev.yml up -d
 	@echo "Development environment started!"
-	@echo "Main site: http://localhost:8080"
-	@echo "Namo site: http://namo.localhost:8080"
-	@echo "Direct Namo frontend: http://localhost:5173"
-	@echo "Direct Namo API: http://localhost:8000"
+	@echo ""
+	@echo "🌐 Available sites:"
+	@echo "  Main site:     http://localhost:8080"
+	@echo "  Felix:         http://felix.localhost:8080"
+	@echo "  MamaRezepte:   http://rezepte.localhost:8080"
+	@echo "  Namo:          http://namo.localhost:8080"
+	@echo ""
+	@echo "🔧 Direct access (for debugging):"
+	@echo "  Distributor:   http://localhost:3000"
+	@echo "  Felix:         http://localhost:4173"
+	@echo "  MamaRezepte:   http://localhost:5174"
+	@echo "  Namo Frontend: http://localhost:5173"
+	@echo "  Namo API:      http://localhost:8000"
+	@echo "  Database:      localhost:5432"
 
 dev-down:
 	@echo "Stopping development environment..."
-	cd Namo && docker-compose -f docker-compose.yml -f ../docker-compose.namo.dev.yml down
 	docker-compose -f docker-compose.dev.yml down
 
 # Production environment
@@ -38,92 +49,75 @@ prod:
 	@echo "Starting production environment..."
 	@echo "Creating global network..."
 	docker network create grabler-network 2>/dev/null || true
-	@echo "Starting main services..."
+	@echo "Starting all production services..."
 	docker-compose up -d
-	@echo "Starting Namo services..."
-	cd Namo && docker-compose -f docker-compose.yml -f ../docker-compose.namo.yml up -d
 	@echo "Production environment started!"
-	@echo "Configure your DNS to point to this server:"
+	@echo ""
+	@echo "🌐 Configure your DNS to point to this server:"
 	@echo "  grabler.me -> your-server-ip"
+	@echo "  felix.grabler.me -> your-server-ip"
+	@echo "  rezepte.grabler.me -> your-server-ip"
 	@echo "  namo.grabler.me -> your-server-ip"
 
 prod-down:
 	@echo "Stopping production environment..."
-	cd Namo && docker-compose -f docker-compose.yml -f ../docker-compose.namo.yml down
 	docker-compose down
 
 # Build all services
 build:
-	@echo "Building main services..."
+	@echo "Building all services..."
 	docker-compose build
 	docker-compose -f docker-compose.dev.yml build
-	@echo "Building Namo services..."
-	docker-compose -f ./Namo/docker-compose.yml build
 
 # Show logs
 logs:
 	@echo "Showing logs from all production services..."
-	docker-compose logs -f &
-	docker-compose -f ./Namo/docker-compose.yml -f ./docker-compose.namo.yml logs -f
+	docker-compose logs -f
 
 logs-dev:
 	@echo "Showing logs from all development services..."
-	docker-compose -f docker-compose.dev.yml logs -f &
-	docker-compose -f ./Namo/docker-compose.yml -f ./docker-compose.namo.dev.yml logs -f
+	docker-compose -f docker-compose.dev.yml logs -f
 
 # Clean everything
 clean:
 	@echo "Cleaning up everything..."
 	docker-compose down -v --rmi all
 	docker-compose -f docker-compose.dev.yml down -v --rmi all
-	docker-compose -f ./Namo/docker-compose.yml down -v --rmi all
 	docker system prune -f
 
 # Restart services
 restart:
-	@echo "Restarting main services..."
+	@echo "Restarting production services..."
 	docker-compose restart
-	@echo "Restarting Namo services..."
-	docker-compose -f ./Namo/docker-compose.yml restart
 
 restart-dev:
+	@echo "Restarting development services..."
 	docker-compose -f docker-compose.dev.yml restart
 
 # Health check
 health:
 	@echo "Checking service health..."
+	@echo ""
+	@echo "🔍 Production services:"
 	docker-compose ps
-	@echo "\nChecking Namo API health:"
+	@echo ""
+	@echo "🔍 Development services:"
+	docker-compose -f docker-compose.dev.yml ps
+	@echo ""
+	@echo "🏥 Health checks:"
 	@curl -f http://localhost:8000/health 2>/dev/null && echo "✅ Namo API healthy" || echo "❌ Namo API unhealthy"
 
-# Debug environment with direct passwords
-debug:
-	@echo "Starting debug environment (using direct passwords)..."
-	@echo "Creating global network..."
-	docker network create grabler-network 2>/dev/null || true
-	@echo "Starting main services..."
-	docker-compose up -d
-	@echo "Starting Namo services with debug config..."
-	docker-compose -f ./Namo/docker-compose.yml -f ./docker-compose.namo.debug.yml up -d
-	@echo "Debug environment started!"
-	@echo "Check logs with: make logs-debug"
-
-# Test only Namo services
-test-namo:
-	@echo "Testing Namo services only..."
-	@echo "Creating global network..."
-	docker network create grabler-network 2>/dev/null || true
-	@echo "Starting Namo services..."
-	docker-compose -f ./Namo/docker-compose.yml -f ./docker-compose.namo.debug.yml up -d
-	@echo "Namo services started!"
-	@echo "Check with: docker-compose -f ./Namo/docker-compose.yml -f ./docker-compose.namo.debug.yml ps"
-
-logs-debug:
-	@echo "Showing debug logs..."
-	docker-compose -f ./Namo/docker-compose.yml -f ./docker-compose.namo.debug.yml logs -f
+# Update git submodules
 update-submodules:
+	@echo "Updating git submodules..."
+	@echo "Initializing submodules..."
 	git submodule update --init --recursive
+	@echo "Pulling latest changes from all submodules..."
 	git submodule foreach git pull origin main
+	@echo "✅ Submodules updated!"
+	@echo ""
+	@echo "📦 Submodule status:"
+	git submodule status
 
 # Setup development environment
 setup-dev:
@@ -139,3 +133,30 @@ setup-dev:
 		echo "⚠️  Please update the secrets in ./Namo/secrets/ before starting!"; \
 	fi
 	@echo "✅ Development setup complete!"
+
+# Quick commands for specific services
+felix-dev:
+	@echo "Starting only Felix in development mode..."
+	docker-compose -f docker-compose.dev.yml up felix -d
+
+mama-rezepte-dev:
+	@echo "Starting only MamaRezepte in development mode..."
+	docker-compose -f docker-compose.dev.yml up mama-rezepte -d
+
+namo-dev:
+	@echo "Starting only Namo services in development mode..."
+	docker-compose -f docker-compose.dev.yml up namo-db namo-backend namo-frontend -d
+
+# Show service URLs
+show-urls:
+	@echo "🌐 Development URLs:"
+	@echo "  Main:        http://localhost:8080"
+	@echo "  Felix:       http://felix.localhost:8080"
+	@echo "  MamaRezepte: http://rezepte.localhost:8080"
+	@echo "  Namo:        http://namo.localhost:8080"
+	@echo ""
+	@echo "🌐 Production URLs (when deployed):"
+	@echo "  Main:        https://grabler.me"
+	@echo "  Felix:       https://felix.grabler.me"
+	@echo "  MamaRezepte: https://rezepte.grabler.me"
+	@echo "  Namo:        https://namo.grabler.me"

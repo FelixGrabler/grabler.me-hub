@@ -1,81 +1,108 @@
 # Grabler.me Hub
 
-A distributed project hub
+A multi-project hub serving applications on different subdomains: **grabler.me**, **felix.grabler.me**, **rezepte.grabler.me**, and **namo.grabler.me**.
 
-````
+## 🏗️ Project Structure
+
+```
 grabler.me-hub/
-├── docker-compose.yml              # Main hub (production)
-├── docker-compose.dev.yml          # Main hub (development)
-├── docker-compose.namo.yml         # Namo integration overrides (production)
-├── docker-compose.namo.dev.yml     # Namo integration overrides (development)
+├── docker-compose.yml              # Production environment (all services)
+├── docker-compose.dev.yml          # Development environment (all services)
 ├── Makefile                        # Management commands
+├── update-submodules.sh           # Script to update git submodules
 ├── README.md                       # This file
-├── distributor-frontend/           # Main hub website (Vue.js)
+├── distributor/                    # Main hub website (grabler.me)
 │   ├── src/
 │   ├── Dockerfile
 │   ├── Dockerfile.dev
 │   └── package.json
-├── proxy/                          # Nginx configuration
-│   ├── nginx.conf                 # Production config
-│   └── nginx.dev.conf             # Development config
-└── Namo/                          # Namo project (submodule)
-    ├── docker-compose.yml         # Original Namo services
+├── proxy/                          # Nginx reverse proxy
+│   ├── nginx.conf                 # Production routing config
+│   └── nginx.dev.conf             # Development routing config
+├── Felix/                         # Felix's portfolio (submodule)
+│   ├── src/
+│   ├── Dockerfile
+│   ├── Dockerfile.dev
+│   └── package.json
+├── MamaRezepte/                   # Recipe app (submodule)
+│   └── frontend/
+│       ├── src/
+│       ├── Dockerfile
+│       ├── Dockerfile.dev
+│       └── package.json
+└── Namo/                          # Namo travel app (submodule)
     ├── app/
     │   ├── backend/               # FastAPI backend
     │   └── frontend/              # Vue.js frontend
     └── secrets/                   # Namo secrets
-```ing page for multiple applications, each running on their own subdomain. The hub uses Docker Compose to orchestrate multiple projects and an Nginx proxy to route traffic based on subdomains.
+```
+
+## 🌐 Domain Structure
+
+| Domain               | Service     | Description                 |
+| -------------------- | ----------- | --------------------------- |
+| `grabler.me`         | Distributor | Main landing page and hub   |
+| `felix.grabler.me`   | Felix       | Personal portfolio website  |
+| `rezepte.grabler.me` | MamaRezepte | Recipe collection app       |
+| `namo.grabler.me`    | Namo        | Travel planning application |
 
 ## 🏗️ Architecture
 
-The project uses a **compose file overlay pattern** to avoid duplicating service definitions:
-
-````
-
-Main Compose Files:
-├── docker-compose.yml # Main hub services (production)
-├── docker-compose.dev.yml # Main hub services (development)
-└── Subproject Integration:
-├── Namo/docker-compose.yml # Original Namo services
-├── docker-compose.namo.yml # Production overrides for global integration
-└── docker-compose.namo.dev.yml # Development overrides for global integration
+This is a centralized hub that orchestrates multiple web applications using **Docker Compose** and **Nginx reverse proxy**. The architecture uses a **simplified two-file approach** for easy management:
 
 ```
+Docker Services:
+├── docker-compose.yml     # Production: all services in one file
+└── docker-compose.dev.yml # Development: all services in one file
 
-This approach means:
-- ✅ **No duplication**: Each subproject keeps its own docker-compose.yml
-- ✅ **Clean integration**: Small override files handle global network integration
-- ✅ **Maintainable**: Changes to subprojects don't require updating the main compose
-- ✅ **Flexible**: Easy to add/remove subprojects
-
+Git Structure:
+├── distributor/           # Main frontend (directly in repo)
+├── Felix/                 # Git submodule
+├── MamaRezepte/          # Git submodule
+└── Namo/                 # Git submodule
 ```
 
-┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
-│ grabler.me │ │ namo.grabler.me │ │ app3.grabler.me │
-│ (Vue.js app) │ │ (Namo app) │ │ (Future app) │
-└─────────────────┘ └─────────────────┘ └─────────────────┘
-│ │ │
-└───────────────────────┼───────────────────────┘
-│
-┌─────────────────┐
-│ Nginx Proxy │
-│ (Port 80/443) │
-└─────────────────┘
-│
-┌─────────────────┐
-│ Docker Network │
-│ grabler-net │
-└─────────────────┘
+This simplified approach means:
 
+- ✅ **Single source of truth**: Only two compose files to manage
+- ✅ **No file sprawl**: Eliminated 8+ docker-compose files down to 2
+- ✅ **Direct dockerfile usage**: Uses Dockerfiles from submodules directly
+- ✅ **Easy updates**: Simple command to update all submodules
+- ✅ **Clear separation**: Development vs production environments
+
+```
+┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
+│ grabler.me      │ │ felix.grabler.me│ │rezepte.grabler.me│ │ namo.grabler.me │
+│ (Main Hub)      │ │ (Portfolio)     │ │ (Recipes)       │ │ (Travel App)    │
+└─────────────────┘ └─────────────────┘ └─────────────────┘ └─────────────────┘
+        │                    │                    │                    │
+        └────────────────────┼────────────────────┼────────────────────┘
+                             │                    │
+                    ┌─────────────────┐          │
+                    │   Nginx Proxy   │          │
+                    │  (Port 80/443)  │          │
+                    └─────────────────┘          │
+                             │                    │
+                    ┌─────────────────┐          │
+                    │ Docker Network  │          │
+                    │ grabler-network │          │
+                    └─────────────────┘          │
+                                                 │
+                                        ┌─────────────────┐
+                                        │ PostgreSQL DB   │
+                                        │ (For Namo)      │
+                                        └─────────────────┘
 ```
 
 ## 🚀 Features
 
-- **Main Hub**: Vue.js application displaying project tiles with descriptions and links
-- **Subdomain Routing**: Nginx proxy automatically routes subdomains to appropriate containers
-- **Dockerized**: All services run in Docker containers for easy deployment
+- **Multi-Project Hub**: Centralized management of multiple independent applications
+- **Subdomain Routing**: Nginx proxy automatically routes traffic based on subdomains
+- **Git Submodules**: Each project is a separate git repository for independent development
+- **Dockerized**: All services containerized for consistent deployment
 - **Development Mode**: Hot-reload development environment with direct port access
 - **Production Ready**: Optimized builds with caching, compression, and security headers
+- **Simplified Management**: Two docker-compose files instead of 8+
 
 ## 📁 Project Structure
 
@@ -100,7 +127,7 @@ grabler.me-hub/
 │ └── frontend/ # Vue.js frontend
 └── docker-compose.yml
 
-````
+```
 
 ## 🛠️ Setup and Usage
 
@@ -108,92 +135,251 @@ grabler.me-hub/
 
 - Docker and Docker Compose
 - Make (for using the Makefile commands)
+- Git (for submodule management)
 
 ### Quick Start
 
-1. **Clone the repository**:
+1. **Clone the repository with submodules**:
 
    ```bash
-   git clone <repository-url>
+   git clone --recurse-submodules <repository-url>
    cd grabler.me-hub
-````
+   ```
 
-2. **Setup development environment**:
+2. **Update submodules** (if needed):
+
+   ```bash
+   make update-submodules
+   # or
+   ./update-submodules.sh
+   ```
+
+3. **Setup development environment**:
 
    ```bash
    make setup-dev
    ```
 
-3. **Start development environment**:
+4. **Start development environment**:
 
    ```bash
    make dev
    ```
 
-4. **Access the applications**:
-   - Main hub: http://localhost:8080
-   - Namo: http://namo.localhost:8080
-   - Direct Namo frontend: http://localhost:5173
-   - Direct Namo API: http://localhost:8000
+5. **Access the applications**:
+
+   - **Main hub**: http://localhost:8080
+   - **Felix**: http://felix.localhost:8080
+   - **MamaRezepte**: http://rezepte.localhost:8080
+   - **Namo**: http://namo.localhost:8080
+
+   **Direct access for debugging**:
+
+   - Distributor: http://localhost:3000
+   - Felix: http://localhost:4173
+   - MamaRezepte: http://localhost:5174
+   - Namo Frontend: http://localhost:5173
+   - Namo API: http://localhost:8000
 
 ### Available Commands
 
 ```bash
 # Development
-make dev         # Start development environment
-make dev-down    # Stop development environment
-make logs-dev    # View development logs
+make dev              # Start all development services
+make dev-down         # Stop development environment
+make logs-dev         # View development logs
+make restart-dev      # Restart development services
 
 # Production
-make prod        # Start production environment
-make prod-down   # Stop production environment
-make logs        # View production logs
+make prod             # Start all production services
+make prod-down        # Stop production environment
+make logs             # View production logs
+make restart          # Restart production services
+
+# Individual services (development)
+make felix-dev        # Start only Felix
+make mama-rezepte-dev # Start only MamaRezepte
+make namo-dev         # Start only Namo services
 
 # Maintenance
-make build       # Build all services
-make clean       # Remove all containers and images
-make restart     # Restart all services
-make health      # Check service health
+make build            # Build all services
+make clean            # Remove all containers and images
+make health           # Check service health
+make show-urls        # Display all service URLs
+
+# Submodule management
+make update-submodules # Update all git submodules
+./update-submodules.sh # Alternative script for updating submodules
 ```
 
 ## 🌐 Adding New Projects
 
 To add a new project to the hub:
 
-1. **Add the project as a submodule** (if using git submodules):
+1. **Add the project as a submodule**:
 
    ```bash
    git submodule add <project-repo-url> <project-name>
+   cd <project-name>
+   git checkout main  # or appropriate branch
+   cd ..
    ```
 
-2. **Create integration override files**:
+2. **Update docker-compose files**:
+   Add the new service to both `docker-compose.yml` and `docker-compose.dev.yml`:
 
+   ```yaml
+   # In docker-compose.yml (production)
+   new-project:
+     build:
+       context: ./<project-name>
+       dockerfile: Dockerfile
+     container_name: new-project
+     restart: unless-stopped
+     networks:
+       - grabler-network
+
+   # In docker-compose.dev.yml (development)
+   new-project:
+     build:
+       context: ./<project-name>
+       dockerfile: Dockerfile.dev
+     container_name: new-project-dev
+     restart: unless-stopped
+     ports:
+       - "XXXX:3000"  # Choose an available port
+     volumes:
+       - ./<project-name>:/app
+       - /app/node_modules
+     networks:
+       - grabler-network
+   ```
+
+3. **Update nginx configurations**:
+   Add the new subdomain to both `proxy/nginx.conf` and `proxy/nginx.dev.conf`:
+
+   ```nginx
+   # New subdomain (newproject.grabler.me or newproject.localhost)
+   server {
+       listen 80;
+       server_name newproject.grabler.me;  # or newproject.localhost for dev
+
+       location / {
+           proxy_pass http://new-project:80;  # or new-project-dev:3000 for dev
+           proxy_set_header Host $host;
+           proxy_set_header X-Real-IP $remote_addr;
+           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+           proxy_set_header X-Forwarded-Proto $scheme;
+       }
+   }
+   ```
+
+4. **Update proxy dependencies**:
+   Add the new service to the proxy's `depends_on` section in both compose files.
+
+5. **Test the integration**:
    ```bash
-   # For production
-   cp docker-compose.namo.yml docker-compose.newproject.yml
-   # For development
-   cp docker-compose.namo.dev.yml docker-compose.newproject.dev.yml
-   # Edit these files to match your new project's service names
+   make dev
+   # Check that your new service is accessible
    ```
+
+## 🔧 Submodule Management
+
+cp docker-compose.namo.dev.yml docker-compose.newproject.dev.yml
+
+# Edit these files to match your new project's service names
+
+````
 
 3. **Update Makefile** to include the new project in commands
 
 4. **Update proxy/nginx.conf** to add routing for the new subdomain
 
 5. **Update distributor-frontend/src/App.vue** to add a new tile:
-   ```javascript
-   {
-     id: 'new-project',
-     title: 'New Project',
-     description: 'Description of the new project',
-     url: 'https://newproject.grabler.me',
-     icon: '🚀',
-     gradient: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%)',
-     status: 'live'
-   }
+```javascript
+{
+  id: 'new-project',
+  title: 'New Project',
+  description: 'Description of the new project',
+  url: 'https://newproject.grabler.me',
+  icon: '🚀',
+  gradient: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%)',
+  status: 'live'
+}
+````
+
+5. **Test the integration**:
+   ```bash
+   make dev
+   # Check that your new service is accessible
    ```
 
-The beauty of this approach is that **each subproject maintains its own docker-compose.yml** and you just create small override files for integration!
+## 🔧 Submodule Management
+
+This project uses Git submodules to include separate projects. Here are the common commands:
+
+### Updating Submodules
+
+```bash
+# Method 1: Use the Makefile
+make update-submodules
+
+# Method 2: Use the shell script
+./update-submodules.sh
+
+# Method 3: Manual git commands
+git submodule update --init --recursive
+git submodule foreach git pull origin main
+```
+
+### Adding a New Submodule
+
+```bash
+git submodule add <repository-url> <directory-name>
+cd <directory-name>
+git checkout main  # or the branch you want to track
+cd ..
+git add .gitmodules <directory-name>
+git commit -m "Add <project-name> submodule"
+```
+
+### Working with Submodules
+
+```bash
+# Check status of all submodules
+git submodule status
+
+# Update a specific submodule to latest
+git submodule update --remote <submodule-path>
+
+# Reset a submodule if it's in a weird state
+git submodule update --init --force <submodule-path>
+
+# Remove a submodule (if needed)
+git submodule deinit <submodule-path>
+git rm <submodule-path>
+rm -rf .git/modules/<submodule-path>
+```
+
+### Working on Submodule Code
+
+When you want to make changes to a submodule:
+
+```bash
+cd <submodule-directory>
+git checkout main  # or appropriate branch
+# Make your changes
+git add .
+git commit -m "Your changes"
+git push origin main
+
+# Back in the hub repo
+cd ..
+git add <submodule-directory>
+git commit -m "Update <submodule-name> to latest"
+```
+
+## 🔧 Configuration
 
 ## 🔧 Configuration
 

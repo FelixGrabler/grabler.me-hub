@@ -18,7 +18,41 @@ services:
     networks:
       - grabler-network
 
-  # Namo project services (same as production but with different ports)
+  # Felix frontend (felix.localhost:8080)
+  felix:
+    build:
+      context: ./Felix
+      dockerfile: Dockerfile.dev
+    container_name: felix-dev
+    restart: unless-stopped
+    ports:
+      - "4173:4173"
+    volumes:
+      - ./Felix:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    networks:
+      - grabler-network
+
+  # MamaRezepte frontend (rezepte.localhost:8080)
+  mama-rezepte:
+    build:
+      context: ./MamaRezepte/frontend
+      dockerfile: Dockerfile.dev
+    container_name: mama-rezepte-dev
+    restart: unless-stopped
+    ports:
+      - "5174:5173"
+    volumes:
+      - ./MamaRezepte/frontend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    networks:
+      - grabler-network
+
+  # Namo Database
   namo-db:
     image: postgres:16-alpine
     container_name: namo-db-dev
@@ -41,10 +75,11 @@ services:
     networks:
       - grabler-network
 
+  # Namo Backend
   namo-backend:
     build:
-      context: ./Namo
-      dockerfile: app/backend/Dockerfile.dev
+      context: ./Namo/app/backend
+      dockerfile: Dockerfile.dev
     container_name: namo-backend-dev
     depends_on:
       namo-db:
@@ -93,10 +128,11 @@ services:
     networks:
       - grabler-network
 
+  # Namo Frontend
   namo-frontend:
     build:
-      context: ./Namo
-      dockerfile: app/frontend/Dockerfile.dev
+      context: ./Namo/app/frontend
+      dockerfile: Dockerfile.dev
     container_name: namo-frontend-dev
     depends_on:
       namo-backend:
@@ -125,6 +161,8 @@ services:
       - ./proxy/nginx.dev.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - distributor
+      - felix
+      - mama-rezepte
       - namo-frontend
       - namo-backend
     networks:
