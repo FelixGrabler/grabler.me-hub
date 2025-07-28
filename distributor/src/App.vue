@@ -55,7 +55,7 @@ export default {
           description: 'My personal portfolio website showcasing my projects, skills, and professional experience. A modern, responsive showcase of my work and expertise.',
           url: felixUrl,
           image: '/data/Felix.jpg',
-          status: 'live'
+          status: 'development'
         },
         {
           id: 'mama-rezepte',
@@ -63,7 +63,7 @@ export default {
           description: 'Eine Sammlung von Familienrezepten. Zusätzliche Features wie Filter und Mengenberechnung kommen bald.',
           url: rezepteUrl,
           image: '/data/essen1.jpg',
-          status: 'live'
+          status: 'development'
         },
         {
           id: 'namo',
