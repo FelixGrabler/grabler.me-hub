@@ -83,7 +83,7 @@ services:
       ACCESS_TOKEN_EXPIRE_MINUTES: "10080"
 
       # CORS Configuration
-      CORS_ORIGINS: "https://namo.grabler.me"
+      CORS_ORIGINS: "*" # "https://namo.grabler.me"
 
       # Logging Configuration
       LOG_MAX_SIZE_MB: "10"

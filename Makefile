@@ -50,7 +50,7 @@ prod:
 	@echo "Creating global network..."
 	docker network create grabler-network 2>/dev/null || true
 	@echo "Starting all production services..."
-	docker-compose up -d
+	docker-compose up --build -d
 	@echo "Production environment started!"
 	@echo ""
 	@echo "🌐 Configure your DNS to point to this server:"
