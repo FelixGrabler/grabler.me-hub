@@ -6,21 +6,27 @@ api:
 entryPoints:
   web:
     address: ":80"
-  websecure:
-    address: ":443"
+  # Remove websecure since DSM handles SSL termination
 
 providers:
   docker:
     endpoint: "unix:///var/run/docker.sock"
     exposedByDefault: false
-
-certificatesResolvers:
-  letsencrypt:
-    acme:
-      email: felix.grabler02@gmail.com
-      storage: /acme/acme.json
-      httpChallenge:
-        entryPoint: web
+# Remove certificatesResolvers since DSM handles SSL certificates
+# certificatesResolvers:
+#   letsencrypt:
+#     acme:
+#       email: felix.grabler02@gmail.com
+#       storage: /acme/acme.json
+#       dnsChallenge:
+#         provider: cloudflare
+#         delayBeforeCheck: 60s
+#         resolvers:
+#           - "1.1.1.1:53"
+#           - "8.8.8.8:53"
+# Fallback to HTTP challenge if needed
+# httpChallenge:
+#   entryPoint: web
 # Optional: Enable access logs
 # accessLog: {}
 

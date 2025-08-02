@@ -11,13 +11,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.distributor.rule=Host(`grabler.me`) || Host(`www.grabler.me`)"
-      - "traefik.http.routers.distributor.entrypoints=websecure"
-      - "traefik.http.routers.distributor.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.distributor.entrypoints=web"
       - "traefik.http.services.distributor.loadbalancer.server.port=80"
-      # HTTP to HTTPS redirect
-      - "traefik.http.routers.distributor-http.rule=Host(`grabler.me`) || Host(`www.grabler.me`)"
-      - "traefik.http.routers.distributor-http.entrypoints=web"
-      - "traefik.http.routers.distributor-http.middlewares=redirect-to-https"
     networks:
       - grabler-network
 
@@ -31,13 +26,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.felix.rule=Host(`felix.grabler.me`)"
-      - "traefik.http.routers.felix.entrypoints=websecure"
-      - "traefik.http.routers.felix.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.felix.entrypoints=web"
       - "traefik.http.services.felix.loadbalancer.server.port=80"
-      # HTTP to HTTPS redirect
-      - "traefik.http.routers.felix-http.rule=Host(`felix.grabler.me`)"
-      - "traefik.http.routers.felix-http.entrypoints=web"
-      - "traefik.http.routers.felix-http.middlewares=redirect-to-https"
     networks:
       - grabler-network
 
@@ -51,13 +41,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.mama-rezepte.rule=Host(`rezepte.grabler.me`)"
-      - "traefik.http.routers.mama-rezepte.entrypoints=websecure"
-      - "traefik.http.routers.mama-rezepte.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.mama-rezepte.entrypoints=web"
       - "traefik.http.services.mama-rezepte.loadbalancer.server.port=80"
-      # HTTP to HTTPS redirect
-      - "traefik.http.routers.mama-rezepte-http.rule=Host(`rezepte.grabler.me`)"
-      - "traefik.http.routers.mama-rezepte-http.entrypoints=web"
-      - "traefik.http.routers.mama-rezepte-http.middlewares=redirect-to-https"
     networks:
       - grabler-network
 
@@ -122,15 +107,10 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.namo-backend.rule=Host(`namo.grabler.me`) && PathPrefix(`/api`)"
-      - "traefik.http.routers.namo-backend.entrypoints=websecure"
-      - "traefik.http.routers.namo-backend.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.namo-backend.entrypoints=web"
       - "traefik.http.services.namo-backend.loadbalancer.server.port=8000"
       - "traefik.http.routers.namo-backend.middlewares=namo-api-strip"
       - "traefik.http.middlewares.namo-api-strip.stripprefix.prefixes=/api"
-      # HTTP to HTTPS redirect
-      - "traefik.http.routers.namo-backend-http.rule=Host(`namo.grabler.me`) && PathPrefix(`/api`)"
-      - "traefik.http.routers.namo-backend-http.entrypoints=web"
-      - "traefik.http.routers.namo-backend-http.middlewares=redirect-to-https"
     secrets:
       - postgres_password
       - secret_key
@@ -161,33 +141,22 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.namo-frontend.rule=Host(`namo.grabler.me`)"
-      - "traefik.http.routers.namo-frontend.entrypoints=websecure"
-      - "traefik.http.routers.namo-frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.namo-frontend.entrypoints=web"
       - "traefik.http.services.namo-frontend.loadbalancer.server.port=80"
-      # HTTP to HTTPS redirect
-      - "traefik.http.routers.namo-frontend-http.rule=Host(`namo.grabler.me`)"
-      - "traefik.http.routers.namo-frontend-http.entrypoints=web"
-      - "traefik.http.routers.namo-frontend-http.middlewares=redirect-to-https"
     networks:
       - grabler-network
 
-  # Traefik reverse proxy with automatic HTTPS
+  # Traefik reverse proxy (HTTP only - DSM handles SSL)
   traefik:
     image: traefik:v3.0
     container_name: traefik
     restart: unless-stopped
     ports:
-      - "8080:80"
-      - "8443:443"
+      - "8880:80" # Only HTTP port needed
       - "8081:8080" # Traefik dashboard
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
-      - ./traefik/acme:/acme
-    labels:
-      # Global redirect middleware
-      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
-      - "traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true"
     networks:
       - grabler-network
 
