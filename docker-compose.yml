@@ -121,7 +121,7 @@ services:
 
 networks:
   grabler-network:
-    driver: bridge
+    external: true
 
 volumes:
   namo-db-data:
