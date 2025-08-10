@@ -40,11 +40,10 @@ services:
     build:
       context: ./MamaRezepte/frontend
       dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=https://rezepte.grabler.me/api
     container_name: mama-rezepte
     restart: unless-stopped
-    environment:
-      - NODE_ENV=production
-      - VITE_API_URL=https://rezepte.grabler.me/api
     depends_on:
       - mama-rezepte-backend
     networks:
