@@ -130,6 +130,8 @@ services:
       namo-backend:
         condition: service_healthy
     restart: unless-stopped
+    volumes:
+      - ./Namo/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     environment:
       VITE_API_URL: "https://namo.grabler.me"
       VITE_ENVIRONMENT: "production"
