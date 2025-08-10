@@ -21,6 +21,20 @@ services:
     networks:
       - grabler-network
 
+  # MamaRezepte backend (rezepte.grabler.me/api)
+  mama-rezepte-backend:
+    build:
+      context: ./MamaRezepte/backend
+      dockerfile: Dockerfile
+    container_name: mama-rezepte-backend
+    restart: unless-stopped
+    volumes:
+      - ./MamaRezepte/backend/data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - grabler-network
+
   # MamaRezepte frontend (rezepte.grabler.me)
   mama-rezepte:
     build:
@@ -28,6 +42,11 @@ services:
       dockerfile: Dockerfile
     container_name: mama-rezepte
     restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - VITE_API_URL=https://rezepte.grabler.me/api
+    depends_on:
+      - mama-rezepte-backend
     networks:
       - grabler-network
 
