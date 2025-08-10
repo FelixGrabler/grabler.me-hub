@@ -8,11 +8,6 @@ services:
       dockerfile: Dockerfile
     container_name: distributor
     restart: unless-stopped
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.distributor.rule=Host(`grabler.me`) || Host(`www.grabler.me`)"
-      - "traefik.http.routers.distributor.entrypoints=web"
-      - "traefik.http.services.distributor.loadbalancer.server.port=80"
     networks:
       - grabler-network
 
@@ -23,11 +18,6 @@ services:
       dockerfile: Dockerfile
     container_name: felix
     restart: unless-stopped
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.felix.rule=Host(`felix.grabler.me`)"
-      - "traefik.http.routers.felix.entrypoints=web"
-      - "traefik.http.services.felix.loadbalancer.server.port=80"
     networks:
       - grabler-network
 
@@ -38,11 +28,6 @@ services:
       dockerfile: Dockerfile
     container_name: mama-rezepte
     restart: unless-stopped
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.mama-rezepte.rule=Host(`rezepte.grabler.me`)"
-      - "traefik.http.routers.mama-rezepte.entrypoints=web"
-      - "traefik.http.services.mama-rezepte.loadbalancer.server.port=80"
     networks:
       - grabler-network
 
@@ -98,19 +83,12 @@ services:
       ACCESS_TOKEN_EXPIRE_MINUTES: "10080"
 
       # CORS Configuration
-      CORS_ORIGINS: "*" # "https://namo.grabler.me"
+      CORS_ORIGINS: "https://namo.grabler.me"
 
       # Logging Configuration
       LOG_MAX_SIZE_MB: "10"
       LOG_BACKUP_COUNT: "3"
       LOG_CONSOLE: "false"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.namo-backend.rule=Host(`namo.grabler.me`) && PathPrefix(`/api`)"
-      - "traefik.http.routers.namo-backend.entrypoints=web"
-      - "traefik.http.services.namo-backend.loadbalancer.server.port=8000"
-      - "traefik.http.routers.namo-backend.middlewares=namo-api-strip"
-      - "traefik.http.middlewares.namo-api-strip.stripprefix.prefixes=/api"
     secrets:
       - postgres_password
       - secret_key
@@ -135,28 +113,9 @@ services:
         condition: service_healthy
     restart: unless-stopped
     environment:
-      VITE_API_URL: "https://namo.grabler.me/api"
+      VITE_API_URL: "https://namo.grabler.me"
       VITE_ENVIRONMENT: "production"
       VITE_APP_NAME: "Namo"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.namo-frontend.rule=Host(`namo.grabler.me`)"
-      - "traefik.http.routers.namo-frontend.entrypoints=web"
-      - "traefik.http.services.namo-frontend.loadbalancer.server.port=80"
-    networks:
-      - grabler-network
-
-  # Traefik reverse proxy (HTTP only - DSM handles SSL)
-  traefik:
-    image: traefik:v3.0
-    container_name: traefik
-    restart: unless-stopped
-    ports:
-      - "8880:80" # Only HTTP port needed
-      - "8081:8080" # Traefik dashboard
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
     networks:
       - grabler-network
 
