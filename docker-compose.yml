@@ -54,6 +54,8 @@ services:
     image: postgres:16-alpine
     container_name: namo-db
     restart: unless-stopped
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_USER: namo
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
