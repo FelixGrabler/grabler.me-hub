@@ -23,7 +23,6 @@
           <div class="project-content">
             <h3 class="project-title">{{ project.title }}</h3>
             <p class="project-description">{{ project.description }}</p>
-            <span class="project-status" :class="project.status">{{ project.status }}</span>
           </div>
         </a>
       </div>
@@ -54,24 +53,21 @@ export default {
           title: 'Felix Portfolio',
           description: 'My personal portfolio website showcasing my projects, skills, and professional experience. A modern, responsive showcase of my work and expertise.',
           url: felixUrl,
-          image: '/data/Felix.jpg',
-          status: 'development'
+          image: '/data/Felix.jpg'
         },
         {
           id: 'mama-rezepte',
           title: 'Mama-Rezepte',
           description: 'Eine Sammlung von Familienrezepten. Zusätzliche Features wie Filter und Mengenberechnung kommen bald.',
           url: rezepteUrl,
-          image: '/data/essen1.jpg',
-          status: 'development'
+          image: '/data/essen1.jpg'
         },
         {
           id: 'namo',
           title: 'Namo',
           description: 'Eine Seite, um den perfekten Vornamen fürs Kind zu finden. Nach aktuellen Daten aus Österreich, mit Features wie Filter, Vergleich von Stimmen mit einer anderen Person und einigen Spielen.',
           url: namoUrl,
-          image: '/data/namo.png',
-          status: 'development'
+          image: '/data/namo.png'
         }
       ]
     }
