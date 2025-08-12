@@ -64,7 +64,7 @@ services:
       - postgres_password
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "namo", "-d", "namo"]
-      interval: 30m
+      interval: 10s
       timeout: 5s
       retries: 5
     networks:
@@ -90,6 +90,7 @@ services:
       POSTGRES_USER: namo
       POSTGRES_DB: namo
       DATABASE_HOST: namo-db
+      DB_HOST: namo-db
 
       # FastAPI Configuration
       DEBUG: "false"
@@ -114,7 +115,7 @@ services:
       - telegram_chat_id
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30m
+      interval: 30s
       timeout: 10s
       retries: 3
     networks:
