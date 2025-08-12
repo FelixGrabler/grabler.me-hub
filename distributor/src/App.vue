@@ -9,8 +9,8 @@
 
     <main class="container">
       <div class="projects-grid">
-        <a 
-          v-for="project in projects" 
+        <a
+          v-for="project in projects"
           :key="project.id"
           :href="project.url"
           class="project-tile"
@@ -45,7 +45,7 @@ export default {
     const felixUrl = isDevelopment ? 'http://felix.localhost:8080' : 'https://felix.grabler.me'
     const rezepteUrl = isDevelopment ? 'http://rezepte.localhost:8080' : 'https://rezepte.grabler.me'
     const namoUrl = isDevelopment ? 'http://namo.localhost:8080' : 'https://namo.grabler.me'
-    
+
     return {
       projects: [
         {
