@@ -1,5 +1,4 @@
 services:
-  # Main distributor frontend (grabler.me)
   distributor:
     build:
       context: ./distributor
@@ -9,150 +8,20 @@ services:
     networks:
       - grabler-network
 
-  # Felix frontend (felix.grabler.me)
-  felix:
-    build:
-      context: ./Felix
-      dockerfile: Dockerfile
-    container_name: felix
-    restart: unless-stopped
-    networks:
-      - grabler-network
-
-  # MamaRezepte backend (rezepte.grabler.me/api)
-  mama-rezepte-backend:
-    build:
-      context: ./MamaRezepte/backend
-      dockerfile: Dockerfile
-    container_name: mama-rezepte-backend
-    restart: unless-stopped
-    volumes:
-      - ./MamaRezepte/backend/data:/app/data
-    environment:
-      - PYTHONUNBUFFERED=1
-    networks:
-      - grabler-network
-
-  # MamaRezepte frontend (rezepte.grabler.me)
-  mama-rezepte:
-    build:
-      context: ./MamaRezepte/frontend
-      dockerfile: Dockerfile
-      args:
-        - VITE_API_URL=https://rezepte.grabler.me/api
-    container_name: mama-rezepte
-    restart: unless-stopped
-    depends_on:
-      - mama-rezepte-backend
-    networks:
-      - grabler-network
-
-  # Namo Database
-  namo-db:
-    image: postgres:16-alpine
-    container_name: namo-db
+  proxy:
+    image: nginx:alpine
+    container_name: grabler-proxy
     restart: unless-stopped
     ports:
-      - "15432:5432"
-    environment:
-      POSTGRES_USER: namo
-      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
-      POSTGRES_DB: namo
+      - "80:80"
+      - "8040:8040"
     volumes:
-      - namo-db-data:/var/lib/postgresql/data
-    secrets:
-      - postgres_password
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "namo", "-d", "namo"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - grabler-network
-
-  # Namo Backend
-  namo-backend:
-    build:
-      context: ./Namo/app/backend
-      dockerfile: Dockerfile
-    container_name: namo-backend
+      - ./proxy/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      namo-db:
-        condition: service_healthy
-    restart: unless-stopped
-    volumes:
-      - ./Namo/logs:/app/backend/logs
-    environment:
-      # Environment
-      ENVIRONMENT: production
-
-      # Database
-      POSTGRES_USER: namo
-      POSTGRES_DB: namo
-      DATABASE_HOST: namo-db
-      DB_HOST: namo-db
-
-      # FastAPI Configuration
-      DEBUG: "false"
-      RELOAD: "false"
-      LOG_LEVEL: "info"
-
-      # JWT Configuration
-      ALGORITHM: "HS256"
-      ACCESS_TOKEN_EXPIRE_MINUTES: "10080"
-
-      # CORS Configuration
-      CORS_ORIGINS: "https://namo.grabler.me"
-
-      # Logging Configuration
-      LOG_MAX_SIZE_MB: "10"
-      LOG_BACKUP_COUNT: "3"
-      LOG_CONSOLE: "false"
-    secrets:
-      - postgres_password
-      - secret_key
-      - telegram_bot_token
-      - telegram_chat_id
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    networks:
-      - grabler-network
-
-  # Namo Frontend
-  namo-frontend:
-    build:
-      context: ./Namo/app/frontend
-      dockerfile: Dockerfile
-    container_name: namo-frontend
-    depends_on:
-      namo-backend:
-        condition: service_healthy
-    restart: unless-stopped
-    volumes:
-      - ./Namo/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-    environment:
-      VITE_API_URL: "https://namo.grabler.me"
-      VITE_ENVIRONMENT: "production"
-      VITE_APP_NAME: "Namo"
+      - distributor
     networks:
       - grabler-network
 
 networks:
   grabler-network:
     external: true
-
-volumes:
-  namo-db-data:
-
-secrets:
-  postgres_password:
-    file: ./Namo/secrets/prod_postgres_password.txt
-  secret_key:
-    file: ./Namo/secrets/prod_secret_key.txt
-  telegram_bot_token:
-    file: ./Namo/secrets/telegram_bot_token.txt
-  telegram_chat_id:
-    file: ./Namo/secrets/prod_telegram_chat_id.txt

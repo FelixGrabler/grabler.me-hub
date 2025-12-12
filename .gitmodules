@@ -1,9 +1,0 @@
-[submodule "Namo"]
-	path = Namo
-	url = https://github.com/FelixGrabler/Namo.git
-[submodule "MamaRezepte"]
-	path = MamaRezepte
-	url = https://github.com/FelixGrabler/MamaRezepte.git
-[submodule "Felix"]
-	path = Felix
-	url = https://github.com/FelixGrabler/Felix.git

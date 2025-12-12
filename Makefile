@@ -1,4 +1,4 @@
-.PHONY: help build up down logs clean dev dev-down prod prod-down restart health update-submodules
+.PHONY: help build logs logs-dev clean dev dev-down prod prod-down restart restart-dev health show-urls
 
 # Default target
 help:
@@ -14,8 +14,6 @@ help:
 	@echo "  restart      - Restart all production services"
 	@echo "  restart-dev  - Restart all development services"
 	@echo "  health       - Check health of all services"
-	@echo "  update-submodules - Update all git submodules"
-	@echo "  setup-dev    - Setup development environment (create example secrets)"
 
 # Development environment
 dev:
@@ -29,16 +27,12 @@ dev:
 	@echo "🌐 Available sites:"
 	@echo "  Main site:     http://localhost:8080"
 	@echo "  Felix:         http://felix.localhost:8080"
+	@echo "  Felix (port):  http://localhost:8040"
 	@echo "  MamaRezepte:   http://rezepte.localhost:8080"
 	@echo "  Namo:          http://namo.localhost:8080"
 	@echo ""
 	@echo "🔧 Direct access (for debugging):"
 	@echo "  Distributor:   http://localhost:3000"
-	@echo "  Felix:         http://localhost:4173"
-	@echo "  MamaRezepte:   http://localhost:5174"
-	@echo "  Namo Frontend: http://localhost:5173"
-	@echo "  Namo API:      http://localhost:8000"
-	@echo "  Database:      localhost:5432"
 
 dev-down:
 	@echo "Stopping development environment..."
@@ -58,6 +52,8 @@ prod:
 	@echo "  felix.grabler.me -> your-server-ip"
 	@echo "  rezepte.grabler.me -> your-server-ip"
 	@echo "  namo.grabler.me -> your-server-ip"
+	@echo ""
+	@echo "📌 Direct Felix access: http://<server-ip>:8040"
 
 prod-down:
 	@echo "Stopping production environment..."
@@ -105,58 +101,21 @@ health:
 	docker-compose -f docker-compose.dev.yml ps
 	@echo ""
 	@echo "🏥 Health checks:"
-	@curl -f http://localhost:8000/health 2>/dev/null && echo "✅ Namo API healthy" || echo "❌ Namo API unhealthy"
-
-# Update git submodules
-update-submodules:
-	@echo "Updating git submodules..."
-	@echo "Initializing submodules..."
-	git submodule update --init --recursive
-	@echo "Pulling latest changes from all submodules..."
-	git submodule foreach git pull origin main
-	@echo "✅ Submodules updated!"
-	@echo ""
-	@echo "📦 Submodule status:"
-	git submodule status
-
-# Setup development environment
-setup-dev:
-	@echo "Setting up development environment..."
-	@echo "Checking if secrets exist..."
-	@if [ ! -f "./Namo/secrets/dev_postgres_password.txt" ]; then \
-		echo "Creating example secrets..."; \
-		mkdir -p ./Namo/secrets; \
-		echo "dev_password_123" > ./Namo/secrets/dev_postgres_password.txt; \
-		echo "your-secret-key-here" > ./Namo/secrets/dev_secret_key.txt; \
-		echo "your-telegram-bot-token" > ./Namo/secrets/telegram_bot_token.txt; \
-		echo "your-telegram-chat-id" > ./Namo/secrets/dev_telegram_chat_id.txt; \
-		echo "⚠️  Please update the secrets in ./Namo/secrets/ before starting!"; \
-	fi
-	@echo "✅ Development setup complete!"
-
-# Quick commands for specific services
-felix-dev:
-	@echo "Starting only Felix in development mode..."
-	docker-compose -f docker-compose.dev.yml up felix -d
-
-mama-rezepte-dev:
-	@echo "Starting only MamaRezepte in development mode..."
-	docker-compose -f docker-compose.dev.yml up mama-rezepte -d
-
-namo-dev:
-	@echo "Starting only Namo services in development mode..."
-	docker-compose -f docker-compose.dev.yml up namo-db namo-backend namo-frontend -d
+	@docker-compose ps
+	@docker-compose -f docker-compose.dev.yml ps
 
 # Show service URLs
 show-urls:
 	@echo "🌐 Development URLs:"
 	@echo "  Main:        http://localhost:8080"
 	@echo "  Felix:       http://felix.localhost:8080"
+	@echo "  Felix (port): http://localhost:8040"
 	@echo "  MamaRezepte: http://rezepte.localhost:8080"
 	@echo "  Namo:        http://namo.localhost:8080"
 	@echo ""
 	@echo "🌐 Production URLs (when deployed):"
 	@echo "  Main:        https://grabler.me"
 	@echo "  Felix:       https://felix.grabler.me"
+	@echo "  Felix (port): http://<server-ip>:8040"
 	@echo "  MamaRezepte: https://rezepte.grabler.me"
 	@echo "  Namo:        https://namo.grabler.me"
