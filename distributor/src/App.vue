@@ -45,6 +45,7 @@ export default {
     const felixUrl = isDevelopment ? 'http://felix.localhost:8080' : 'https://felix.grabler.me'
     const rezepteUrl = isDevelopment ? 'http://rezepte.localhost:8080' : 'https://rezepte.grabler.me'
     const namoUrl = isDevelopment ? 'http://namo.localhost:8080' : 'https://namo.grabler.me'
+    const fischUrl = isDevelopment ? 'http://fisch.localhost:8080' : 'https://fisch.grabler.me'
 
     return {
       projects: [
@@ -68,6 +69,13 @@ export default {
           description: 'Eine Seite, um den perfekten Vornamen fürs Kind zu finden. Nach aktuellen Daten aus Österreich, mit Features wie Filter, Vergleich von Stimmen mit einer anderen Person und einigen Spielen.',
           url: namoUrl,
           image: '/data/namo.png'
+        },
+        {
+          id: 'fisch',
+          title: 'Fisch',
+          description: 'Die Fisch Spaßbude bringt selbst die zertifizierten Fischer an ihre Kenntnisgrenzen. Teste den Fisch in dir, und werde zum Fisch-König.',
+          url: fischUrl,
+          image: '/data/fisch.jpg'
         }
       ]
     }
