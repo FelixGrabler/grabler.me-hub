@@ -46,6 +46,7 @@ export default {
     const rezepteUrl = isDevelopment ? 'http://rezepte.localhost:8080' : 'https://rezepte.grabler.me'
     const namoUrl = isDevelopment ? 'http://namo.localhost:8080' : 'https://namo.grabler.me'
     const fischUrl = isDevelopment ? 'http://fisch.localhost:8080' : 'https://fisch.grabler.me'
+    const krakelUrl = isDevelopment ? 'http://krakel.localhost:8080' : 'https://krakel.grabler.me'
 
     return {
       projects: [
@@ -76,6 +77,13 @@ export default {
           description: 'Die Fisch Spaßbude bringt selbst die zertifizierten Fischer an ihre Kenntnisgrenzen. Teste den Fisch in dir, und werde zum Fisch-König.',
           url: fischUrl,
           image: '/data/fisch.jpg'
+        },
+        {
+          id: 'krakel',
+          title: 'Krakel',
+          description: 'Krakel Orakel kann jeder, auch du!',
+          url: krakelUrl,
+          image: '/data/krakel.png'
         }
       ]
     }
