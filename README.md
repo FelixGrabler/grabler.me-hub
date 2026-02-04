@@ -1,15 +1,15 @@
 # Grabler.me Hub
 
-Landing page (`distributor`) plus a shared Nginx proxy that routes traffic to the app containers already running on the `grabler-network` Docker network.
+Landing page (`distributor`) plus a shared Nginx proxy that routes traffic to app containers on the `grabler-network` Docker network.
 
 ## What lives here
 
-- `distributor/`: grabler.me landing page (Vue + Nginx)
-- `proxy/`: Nginx configs (prod + dev)
-- `docker-compose.yml` / `docker-compose.dev.yml`: start only the proxy and distributor
+- `distributor/`: grabler.me frontend (Vue build) + `/telegram` relay endpoint
+- `proxy/`: Nginx production config
+- `docker-compose.yml`: production stack
 - `Makefile`: helper commands
 
-Your app containers (`felix`, `mama-rezepte`, `mama-rezepte-backend`, `namo-frontend`, `namo-backend`) run from their own repos/images; just attach them to the shared `grabler-network`.
+Your app containers (`felix`, `mamarezepte-frontend`, `namo-frontend`, `namo-backend`, `fisch`) run from their own repos/images; just attach them to the shared `grabler-network`.
 
 ## Quick start
 
@@ -17,20 +17,25 @@ Your app containers (`felix`, `mama-rezepte`, `mama-rezepte-backend`, `namo-fron
 # once per machine
 docker network create grabler-network
 
-# development (proxy on 8080, distributor on 3000)
-make dev
+# configure Telegram relay
+cp .env.example .env
 
-# production-style (proxy on 80 and direct Felix access on 8040)
-make prod
+# production stack (proxy on 8090)
+make up
 ```
 
 ## URLs
 
-- Main hub: `http://localhost:8080` (dev) or `http://<server-ip>` (prod)
-- Felix proxied: `http://felix.localhost:8080` (dev) or `https://felix.grabler.me` (prod)
-- Felix direct port: `http://localhost:8040` (hits the `felix` container on the shared network)
-- MamaRezepte proxied: `http://rezepte.localhost:8080` (dev) / `https://rezepte.grabler.me` (prod)
-- Namo proxied: `http://namo.localhost:8080` (dev) / `https://namo.grabler.me` (prod)
+- Main hub: `https://grabler.me`
+- Subpages:
+  - `https://grabler.me/impressum`
+  - `https://grabler.me/dsgvo`
+  - `https://grabler.me/feedback`
+- Felix proxied: `https://felix.grabler.me`
+- Felix direct port: `http://<server-ip>:8010`
+- MamaRezepte proxied: `https://rezepte.grabler.me`
+- Namo proxied: `https://namo.grabler.me`
+- Fisch proxied: `https://fisch.grabler.me`
 
 ## Attaching other projects
 
@@ -48,7 +53,7 @@ The proxy forwards based on container names:
 
 ## Commands
 
-- `make dev` / `make dev-down` / `make logs-dev` / `make restart-dev`
-- `make prod` / `make prod-down` / `make logs` / `make restart`
+- `make up` / `make down` / `make logs` / `make restart`
+- `make prod` / `make prod-down` (aliases)
 - `make clean` (stop and prune hub containers/images/volumes)
 - `make show-urls` (quick reference to domains/ports)

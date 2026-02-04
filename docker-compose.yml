@@ -5,6 +5,10 @@ services:
       dockerfile: Dockerfile
     container_name: distributor
     restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
     networks:
       - grabler-network
 

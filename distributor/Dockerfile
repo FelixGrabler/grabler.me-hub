@@ -16,14 +16,18 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM nginx:alpine AS production-stage
+FROM node:18-alpine AS production-stage
 
-# Copy built assets from build stage
-COPY --from=build-stage /app/dist /usr/share/nginx/html
+WORKDIR /app
 
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Install production dependencies
+COPY package*.json ./
+RUN npm install --omit=dev
 
+# Copy runtime files
+COPY --from=build-stage /app/dist ./dist
+COPY server.mjs ./server.mjs
+
+ENV NODE_ENV=production
 EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["npm", "run", "start"]
