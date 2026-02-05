@@ -7,6 +7,11 @@ const port = Number(process.env.PORT || 80)
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const distPath = path.join(__dirname, 'dist')
+const escapeHtml = (value) =>
+  String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
 
 app.use(express.json({ limit: '256kb' }))
 
@@ -31,16 +36,14 @@ app.post('/telegram', async (req, res) => {
   }
 
   const lines = [
-    `Kategorie: ${category}`,
-    `Betreff: ${subject}`,
-    source ? `Source: ${source}` : null,
-    page ? `Seite: ${page}` : null,
-    "",
-    "Beschreibung:",
-    "```",
-    description,
-    "```",
-  ].filter(Boolean);
+    `Kategorie: ${escapeHtml(category)}`,
+    `Betreff: ${escapeHtml(subject)}`,
+    source ? `Source: ${escapeHtml(source)}` : null,
+    page ? `Seite: ${escapeHtml(page)}` : null,
+    '',
+    'Beschreibung:',
+    `<pre>${escapeHtml(description)}</pre>`
+  ].filter(Boolean)
 
   try {
     const telegramResponse = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
@@ -51,6 +54,7 @@ app.post('/telegram', async (req, res) => {
       body: JSON.stringify({
         chat_id: chatId,
         text: lines.join('\n'),
+        parse_mode: 'HTML',
         disable_web_page_preview: true
       })
     })
