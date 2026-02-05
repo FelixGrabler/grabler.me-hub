@@ -31,15 +31,16 @@ app.post('/telegram', async (req, res) => {
   }
 
   const lines = [
-    'Neues Feedback',
     `Kategorie: ${category}`,
     `Betreff: ${subject}`,
     source ? `Source: ${source}` : null,
     page ? `Seite: ${page}` : null,
-    '',
-    'Beschreibung:',
-    description
-  ].filter(Boolean)
+    "",
+    "Beschreibung:",
+    "```",
+    description,
+    "```",
+  ].filter(Boolean);
 
   try {
     const telegramResponse = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
