@@ -43,3 +43,6 @@ temp/
 # Cache
 .cache/
 .parcel-cache/
+
+
+__pycache__

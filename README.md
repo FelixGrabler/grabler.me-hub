@@ -10,12 +10,17 @@ Landing page (`distributor`) plus a shared Nginx proxy that routes traffic to ap
 - `Makefile`: helper commands
 
 Your app containers (`felix`, `mamarezepte-frontend`, `namo-frontend`, `namo-backend`, `fisch`) run from their own repos/images; just attach them to the shared `grabler-network`.
+This stack now also hosts a shared auth service (`shared-auth`) plus its own Postgres database for cross-project user accounts.
+The auth API is intended for internal Docker-network use by sibling services, not public browser access.
 
 ## Quick start
 
 ```bash
 # once per machine
 docker network create grabler-network
+
+# generate shared auth + sibling app secrets
+./scripts/generate-shared-secrets.sh
 
 # configure Telegram relay
 cp .env.example .env
@@ -36,6 +41,7 @@ make up
 - MamaRezepte proxied: `https://rezepte.grabler.me`
 - Namo proxied: `https://namo.grabler.me`
 - Fisch proxied: `https://fisch.grabler.me`
+- Link shortener: `https://go.grabler.me`
 
 ## Attaching other projects
 
@@ -50,6 +56,7 @@ The proxy forwards based on container names:
 - `felix.grabler.me` and port `8040` -> container `felix` on port 80
 - `rezepte.grabler.me` -> `mama-rezepte` on port 80 and `mama-rezepte-backend` on port 8000 for `/api/`
 - `namo.grabler.me` -> `namo-frontend` on port 80 and `namo-backend` on port 8000 for `/api/`
+- `go.grabler.me` -> `go-shortener` on port 8000
 
 ## Commands
 

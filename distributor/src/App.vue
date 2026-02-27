@@ -161,7 +161,7 @@
 </template>
 
 <script>
-const CATEGORIES = ['Portfolio', 'Rezepte', 'Namo', 'Fisch', 'Aurena', 'sonstiges']
+const CATEGORIES = ['Portfolio', 'Rezepte', 'Namo', 'Fisch', 'Aurena', 'Link Shortener', 'sonstiges']
 
 export default {
   name: 'App',
@@ -171,6 +171,8 @@ export default {
     const namoUrl = 'https://namo.grabler.me'
     const fischUrl = 'https://fisch.grabler.me'
     const krakelUrl = 'https://krakel.grabler.me'
+    const shortenerUrl = 'https://go.grabler.me'
+    const aurenaUrl = 'https://aurena.grabler.me'
 
     return {
       currentPath: this.normalizePath(window.location.pathname),
@@ -204,6 +206,20 @@ export default {
           description: 'Eine Seite, um den perfekten Vornamen fürs Kind zu finden. Nach aktuellen Daten aus Österreich, mit Features wie Filter, Vergleich von Stimmen mit einer anderen Person und einigen Spielen.',
           url: namoUrl,
           image: '/data/namo.png'
+        },
+        {
+          id: 'link-shortener',
+          title: 'Link Shortener',
+          description: 'Kurze Links fuer grabler.me mit Ablaufdatum, benutzerdefinierten Codes und QR-Codes.',
+          url: shortenerUrl,
+          image: '/favicon.svg'
+        },
+        {
+          id: 'aurena',
+          title: 'Aurena Kalender erstellen',
+          description: 'Hier kann ein Kalender aus Aurena-Auktionen erstellt werden, mit einem Bezirk-Filter nach Wahl.',
+          url: aurenaUrl,
+          image: '/favicon.svg'
         },
         {
           id: 'fisch',
