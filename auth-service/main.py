@@ -1,5 +1,7 @@
+from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from database import Base, User, engine
@@ -13,9 +15,16 @@ from security import (
 )
 
 
-Base.metadata.create_all(bind=engine)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    with engine.begin() as conn:
+        conn.execute(text("SELECT pg_advisory_lock(424243)"))
+        Base.metadata.create_all(bind=conn)
+        conn.execute(text("SELECT pg_advisory_unlock(424243)"))
+    yield
 
-app = FastAPI(title="Grabler Shared Auth", version="0.1.0")
+
+app = FastAPI(title="Grabler Shared Auth", version="0.1.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://grabler.me", "https://go.grabler.me", "https://namo.grabler.me"],
